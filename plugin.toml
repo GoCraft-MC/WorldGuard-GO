@@ -3,6 +3,9 @@ version = "0.1.0"
 api     = "1"
 runtime = "go"
 entry   = "worldguard"
+# commands.tree is compiled from this file by `gocraft-cli pack`.
+# Every command declared here is registered on both Java and Bedrock so that
+# both editions receive tab-completion suggestions.
 
 [subscribe]
 events = [
@@ -14,105 +17,375 @@ perms = [
   "worldguard.region.define",
   "worldguard.region.redefine",
   "worldguard.region.remove",
-  "worldguard.region.flag",
+  "worldguard.region.claim",
   "worldguard.region.addmember",
+  "worldguard.region.addowner",
   "worldguard.region.removemember",
+  "worldguard.region.removeowner",
+  "worldguard.region.select",
   "worldguard.region.info",
+  "worldguard.region.flag",
+  "worldguard.region.setpriority",
+  "worldguard.region.setparent",
+  "worldguard.region.teleport",
   "worldguard.region.list",
   "worldguard.region.bypass",
+  "worldguard.region.load",
+  "worldguard.region.save",
+  "worldguard.region.migrate",
+  "worldguard.region.wand",
+  "worldguard.region.unlimited",
   "worldguard.bypass",
+  "worldguard.notify",
   "worldguard.god",
+  "worldguard.god.other",
   "worldguard.heal",
+  "worldguard.heal.other",
   "worldguard.slay",
+  "worldguard.slay.other",
   "worldguard.locate",
+  "worldguard.locate.other",
   "worldguard.stack",
   "worldguard.stopfire",
   "worldguard.allowfire",
   "worldguard.stoplag",
-  "worldguard.god.other",
-  "worldguard.heal.other",
-  "worldguard.slay.other",
-  "worldguard.locate.other",
+  "worldguard.version",
+  "worldguard.reload",
+  "worldguard.report",
+  "worldguard.profile",
+  "worldguard.running",
+  "worldguard.flushstates",
+  "worldguard.debug",
 ]
 
 # ── /region (/rg) ─────────────────────────────────────────────────────────────
+# All subcommands are registered under both /region and /rg so Java and Bedrock
+# clients receive suggestions for either root literal.
+
 [[commands]]
 name        = "region"
-description = "Manage WorldGuard regions"
+description = "WorldGuard region management"
 aliases     = ["rg"]
 permission  = "worldguard.region.info"
 
-[[commands.children]]
-name        = "define"
-description = "Define a new region from your current selection"
-permission  = "worldguard.region.define"
+  # Creating / removing
+  [[commands.children]]
+  name        = "define"
+  description = "Define a new region from your current WorldEdit selection"
+  aliases     = ["create", "def", "d"]
+  permission  = "worldguard.region.define"
 
-[[commands.children]]
-name        = "redefine"
-description = "Redefine an existing region from your current selection"
-permission  = "worldguard.region.redefine"
+    [[commands.children.arguments]]
+    name     = "name"
+    type     = "string"
 
-[[commands.children]]
-name        = "remove"
-description = "Remove a region"
-permission  = "worldguard.region.remove"
+    [[commands.children.arguments]]
+    name     = "owners"
+    type     = "string"
+    optional = true
+    greedy   = true
 
-[[commands.children]]
-name        = "flag"
-description = "Set a flag on a region"
-permission  = "worldguard.region.flag"
+  [[commands.children]]
+  name        = "redefine"
+  description = "Redefine an existing region's bounds from your current selection"
+  aliases     = ["update", "move"]
+  permission  = "worldguard.region.redefine"
 
-[[commands.children]]
-name        = "addmember"
-description = "Add a member to a region"
-permission  = "worldguard.region.addmember"
+    [[commands.children.arguments]]
+    name = "name"
+    type = "string"
 
-[[commands.children]]
-name        = "removemember"
-description = "Remove a member from a region"
-permission  = "worldguard.region.removemember"
+  [[commands.children]]
+  name        = "remove"
+  description = "Remove a region"
+  aliases     = ["rem", "delete", "del"]
+  permission  = "worldguard.region.remove"
 
-[[commands.children]]
-name        = "info"
-description = "Show information about a region"
-permission  = "worldguard.region.info"
+    [[commands.children.arguments]]
+    name = "name"
+    type = "string"
 
-[[commands.children]]
-name        = "list"
-description = "List all regions"
-permission  = "worldguard.region.list"
+  [[commands.children]]
+  name        = "claim"
+  description = "Claim a region (player self-serve)"
+  permission  = "worldguard.region.claim"
 
-[[commands.children]]
-name        = "bypass"
-description = "Toggle region protection bypass"
-aliases     = ["toggle-bypass"]
-permission  = "worldguard.region.bypass"
+    [[commands.children.arguments]]
+    name = "name"
+    type = "string"
+
+  # Membership
+  [[commands.children]]
+  name        = "addmember"
+  description = "Add one or more members to a region"
+  aliases     = ["addmem", "am"]
+  permission  = "worldguard.region.addmember"
+
+    [[commands.children.arguments]]
+    name = "name"
+    type = "string"
+
+    [[commands.children.arguments]]
+    name   = "members"
+    type   = "player"
+    greedy = true
+
+  [[commands.children]]
+  name        = "addowner"
+  description = "Add one or more owners to a region"
+  aliases     = ["ao"]
+  permission  = "worldguard.region.addowner"
+
+    [[commands.children.arguments]]
+    name = "name"
+    type = "string"
+
+    [[commands.children.arguments]]
+    name   = "owners"
+    type   = "player"
+    greedy = true
+
+  [[commands.children]]
+  name        = "removemember"
+  description = "Remove one or more members from a region"
+  aliases     = ["remmember", "removemem", "remmem", "rm"]
+  permission  = "worldguard.region.removemember"
+
+    [[commands.children.arguments]]
+    name = "name"
+    type = "string"
+
+    [[commands.children.arguments]]
+    name     = "members"
+    type     = "player"
+    optional = true
+    greedy   = true
+
+  [[commands.children]]
+  name        = "removeowner"
+  description = "Remove one or more owners from a region"
+  aliases     = ["remowner", "ro"]
+  permission  = "worldguard.region.removeowner"
+
+    [[commands.children.arguments]]
+    name = "name"
+    type = "string"
+
+    [[commands.children.arguments]]
+    name     = "owners"
+    type     = "player"
+    optional = true
+    greedy   = true
+
+  # Information
+  [[commands.children]]
+  name        = "select"
+  description = "Set your WorldEdit selection to the bounds of a region"
+  aliases     = ["sel", "s"]
+  permission  = "worldguard.region.select"
+
+    [[commands.children.arguments]]
+    name     = "name"
+    type     = "string"
+    optional = true
+
+  [[commands.children]]
+  name        = "info"
+  description = "Show information about a region"
+  aliases     = ["i"]
+  permission  = "worldguard.region.info"
+
+    [[commands.children.arguments]]
+    name     = "name"
+    type     = "string"
+    optional = true
+
+  [[commands.children]]
+  name        = "flags"
+  description = "List all flags set on a region"
+  permission  = "worldguard.region.info"
+
+    [[commands.children.arguments]]
+    name = "name"
+    type = "string"
+
+  [[commands.children]]
+  name        = "list"
+  description = "List regions"
+  permission  = "worldguard.region.list"
+
+    [[commands.children.arguments]]
+    name     = "page"
+    type     = "integer"
+    optional = true
+
+  # Options
+  [[commands.children]]
+  name        = "flag"
+  description = "Set or unset a flag on a region"
+  aliases     = ["f"]
+  permission  = "worldguard.region.flag"
+
+    [[commands.children.arguments]]
+    name = "name"
+    type = "string"
+
+    [[commands.children.arguments]]
+    name = "flag"
+    type = "string"
+
+    [[commands.children.arguments]]
+    name     = "value"
+    type     = "string"
+    optional = true
+    greedy   = true
+
+  [[commands.children]]
+  name        = "setpriority"
+  description = "Set the priority of a region"
+  aliases     = ["priority", "pri"]
+  permission  = "worldguard.region.setpriority"
+
+    [[commands.children.arguments]]
+    name = "name"
+    type = "string"
+
+    [[commands.children.arguments]]
+    name = "priority"
+    type = "integer"
+
+  [[commands.children]]
+  name        = "setparent"
+  description = "Set or remove the parent of a region"
+  aliases     = ["parent", "par"]
+  permission  = "worldguard.region.setparent"
+
+    [[commands.children.arguments]]
+    name = "name"
+    type = "string"
+
+    [[commands.children.arguments]]
+    name     = "parent"
+    type     = "string"
+    optional = true
+
+  # Misc
+  [[commands.children]]
+  name        = "teleport"
+  description = "Teleport to a region's spawn or teleport flag"
+  aliases     = ["tp"]
+  permission  = "worldguard.region.teleport"
+
+    [[commands.children.arguments]]
+    name = "name"
+    type = "string"
+
+  [[commands.children]]
+  name        = "bypass"
+  description = "Toggle region protection bypass"
+  aliases     = ["toggle-bypass"]
+  permission  = "worldguard.region.bypass"
+
+    [[commands.children.arguments]]
+    name     = "state"
+    type     = "enum"
+    values   = ["on", "off"]
+    optional = true
+
+  [[commands.children]]
+  name        = "wand"
+  description = "Give yourself the region selection wand"
+  permission  = "worldguard.region.wand"
+
+  # Management
+  [[commands.children]]
+  name        = "load"
+  description = "Reload region data from disk"
+  aliases     = ["reload"]
+  permission  = "worldguard.region.load"
+
+  [[commands.children]]
+  name        = "save"
+  description = "Save region data to disk"
+  aliases     = ["write"]
+  permission  = "worldguard.region.save"
+
+  [[commands.children]]
+  name        = "migratedb"
+  description = "Migrate region data between storage drivers"
+  permission  = "worldguard.region.migrate"
+
+    [[commands.children.arguments]]
+    name   = "from"
+    type   = "enum"
+    values = ["yaml", "mysql"]
+
+    [[commands.children.arguments]]
+    name   = "to"
+    type   = "enum"
+    values = ["yaml", "mysql"]
+
+  [[commands.children]]
+  name        = "migrateuuid"
+  description = "Convert player names in region data to UUIDs"
+  permission  = "worldguard.region.migrate"
+
+  [[commands.children]]
+  name        = "migrateheights"
+  description = "Extend old regions to new world height limits"
+  permission  = "worldguard.region.migrate"
 
 # ── Gameplay ──────────────────────────────────────────────────────────────────
+
 [[commands]]
 name        = "god"
-description = "Give yourself or another player invincibility"
+description = "Toggle invincibility for yourself or another player"
 permission  = "worldguard.god"
+
+  [[commands.arguments]]
+  name     = "player"
+  type     = "player"
+  optional = true
 
 [[commands]]
 name        = "ungod"
 description = "Remove invincibility from yourself or another player"
 permission  = "worldguard.god"
 
+  [[commands.arguments]]
+  name     = "player"
+  type     = "player"
+  optional = true
+
 [[commands]]
 name        = "heal"
 description = "Heal yourself or another player"
 permission  = "worldguard.heal"
+
+  [[commands.arguments]]
+  name     = "player"
+  type     = "player"
+  optional = true
 
 [[commands]]
 name        = "slay"
 description = "Slay yourself or another player"
 permission  = "worldguard.slay"
 
+  [[commands.arguments]]
+  name     = "player"
+  type     = "player"
+  optional = true
+
 [[commands]]
 name        = "locate"
 description = "Point your compass to a player or spawn"
 permission  = "worldguard.locate"
+
+  [[commands.arguments]]
+  name     = "player"
+  type     = "player"
+  optional = true
 
 [[commands]]
 name        = "stack"
@@ -121,15 +394,26 @@ aliases     = [";"]
 permission  = "worldguard.stack"
 
 # ── Emergency ─────────────────────────────────────────────────────────────────
+
 [[commands]]
 name        = "stopfire"
 description = "Stop all fire spread on the current or given world"
 permission  = "worldguard.stopfire"
 
+  [[commands.arguments]]
+  name     = "world"
+  type     = "string"
+  optional = true
+
 [[commands]]
 name        = "allowfire"
 description = "Lift the fire spread suspension"
 permission  = "worldguard.allowfire"
+
+  [[commands.arguments]]
+  name     = "world"
+  type     = "string"
+  optional = true
 
 [[commands]]
 name        = "stoplag"
@@ -138,69 +422,96 @@ aliases     = ["halt-activity", "haltactivity"]
 permission  = "worldguard.stoplag"
 
 # ── /wg ───────────────────────────────────────────────────────────────────────
+
 [[commands]]
 name        = "wg"
 description = "WorldGuard management commands"
 permission  = "worldguard.version"
 
-[[commands.children]]
-name        = "version"
-description = "Show WorldGuard-GO version"
-permission  = "worldguard.version"
+  [[commands.children]]
+  name        = "version"
+  description = "Show WorldGuard-GO version"
+  permission  = "worldguard.version"
 
-[[commands.children]]
-name        = "reload"
-description = "Reload configuration, blacklist, and region data"
-permission  = "worldguard.reload"
+  [[commands.children]]
+  name        = "reload"
+  description = "Reload configuration, blacklist, and region data"
+  permission  = "worldguard.reload"
 
-[[commands.children]]
-name        = "report"
-description = "Write a server report file"
-permission  = "worldguard.report"
+  [[commands.children]]
+  name        = "report"
+  description = "Write a server report file"
+  permission  = "worldguard.report"
 
-[[commands.children]]
-name        = "profile"
-description = "Profile CPU usage of the server"
-permission  = "worldguard.profile"
+  [[commands.children]]
+  name        = "profile"
+  description = "Profile server CPU usage"
+  permission  = "worldguard.profile"
 
-[[commands.children]]
-name        = "stopprofile"
-description = "Stop the currently running profiler"
-permission  = "worldguard.profile"
+    [[commands.children.arguments]]
+    name     = "minutes"
+    type     = "integer"
+    optional = true
 
-[[commands.children]]
-name        = "running"
-description = "Show WorldGuard running tasks"
-aliases     = ["queue"]
-permission  = "worldguard.running"
+  [[commands.children]]
+  name        = "stopprofile"
+  description = "Stop the currently running profiler"
+  permission  = "worldguard.profile"
 
-[[commands.children]]
-name        = "flushstates"
-description = "Clear stored player flag states"
-aliases     = ["clearstates"]
-permission  = "worldguard.flushstates"
+  [[commands.children]]
+  name        = "running"
+  description = "Show WorldGuard running tasks"
+  aliases     = ["queue"]
+  permission  = "worldguard.running"
 
-[[commands.children]]
-name        = "debug"
-description = "Simulate block/entity events for troubleshooting"
-permission  = "worldguard.debug"
+  [[commands.children]]
+  name        = "flushstates"
+  description = "Clear stored player flag states"
+  aliases     = ["clearstates"]
+  permission  = "worldguard.flushstates"
 
-[[commands.children.children]]
-name        = "testbreak"
-description = "Simulate a block break event"
-permission  = "worldguard.debug"
+    [[commands.children.arguments]]
+    name     = "player"
+    type     = "player"
+    optional = true
 
-[[commands.children.children]]
-name        = "testplace"
-description = "Simulate a block place event"
-permission  = "worldguard.debug"
+  [[commands.children]]
+  name        = "debug"
+  description = "Simulate block or entity events for troubleshooting"
+  permission  = "worldguard.debug"
 
-[[commands.children.children]]
-name        = "testinteract"
-description = "Simulate a block interact event"
-permission  = "worldguard.debug"
+    [[commands.children.children]]
+    name        = "testbreak"
+    description = "Simulate a block break event"
+    permission  = "worldguard.debug"
 
-[[commands.children.children]]
-name        = "testdamage"
-description = "Simulate an entity damage event"
-permission  = "worldguard.debug"
+      [[commands.children.children.arguments]]
+      name = "player"
+      type = "player"
+
+    [[commands.children.children]]
+    name        = "testplace"
+    description = "Simulate a block place event"
+    permission  = "worldguard.debug"
+
+      [[commands.children.children.arguments]]
+      name = "player"
+      type = "player"
+
+    [[commands.children.children]]
+    name        = "testinteract"
+    description = "Simulate a block interact event"
+    permission  = "worldguard.debug"
+
+      [[commands.children.children.arguments]]
+      name = "player"
+      type = "player"
+
+    [[commands.children.children]]
+    name        = "testdamage"
+    description = "Simulate an entity damage event"
+    permission  = "worldguard.debug"
+
+      [[commands.children.children.arguments]]
+      name = "player"
+      type = "player"
