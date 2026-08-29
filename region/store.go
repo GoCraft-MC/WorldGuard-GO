@@ -2,8 +2,10 @@ package region
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"sync"
 )
 
@@ -41,7 +43,7 @@ func (s *Store) Get(name string) *Region {
 	return s.regions[normaliseName(name)]
 }
 
-// List returns all regions.
+// List returns all regions sorted by name.
 func (s *Store) List() []*Region {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
@@ -49,20 +51,72 @@ func (s *Store) List() []*Region {
 	for _, r := range s.regions {
 		out = append(out, r)
 	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
 	return out
 }
 
-// At returns all regions whose bounds contain pos.
+// At returns all regions whose bounds contain pos, sorted by priority descending.
 func (s *Store) At(pos Vec3) []*Region {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	var out []*Region
 	for _, r := range s.regions {
-		if r.Bounds.Contains(pos) {
+		if r.Global || r.Bounds.Contains(pos) {
+			out = append(out, r)
+		}
+	}
+	sort.Slice(out, func(i, j int) bool {
+		return out[i].Priority > out[j].Priority
+	})
+	return out
+}
+
+// Children returns all regions whose parent is name.
+func (s *Store) Children(name string) []*Region {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	key := normaliseName(name)
+	var out []*Region
+	for _, r := range s.regions {
+		if normaliseName(r.Parent) == key {
 			out = append(out, r)
 		}
 	}
 	return out
+}
+
+// SetParent sets the parent of name to parent, detecting circular inheritance.
+// Pass an empty parent to remove the parent.
+func (s *Store) SetParent(name, parent string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	r := s.regions[normaliseName(name)]
+	if r == nil {
+		return fmt.Errorf("region %q does not exist", name)
+	}
+	if parent == "" {
+		r.Parent = ""
+		return s.save()
+	}
+	if normaliseName(parent) == normaliseName(name) {
+		return fmt.Errorf("a region cannot be its own parent")
+	}
+	// Detect circular inheritance.
+	visited := map[string]bool{normaliseName(name): true}
+	cur := normaliseName(parent)
+	for cur != "" {
+		if visited[cur] {
+			return fmt.Errorf("circular inheritance detected")
+		}
+		visited[cur] = true
+		p := s.regions[cur]
+		if p == nil {
+			break
+		}
+		cur = normaliseName(p.Parent)
+	}
+	r.Parent = parent
+	return s.save()
 }
 
 // Put adds or replaces a region and persists the store.
@@ -75,12 +129,24 @@ func (s *Store) Put(r *Region) error {
 
 // Remove deletes the region with the given name and persists the store.
 // Returns false if no such region exists.
-func (s *Store) Remove(name string) (bool, error) {
+// If unparent is true, children are unparented; if recursive is true, children are deleted.
+func (s *Store) Remove(name string, unparent, recursive bool) (bool, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	key := normaliseName(name)
 	if _, ok := s.regions[key]; !ok {
 		return false, nil
+	}
+	for _, r := range s.regions {
+		if normaliseName(r.Parent) == key {
+			if recursive {
+				delete(s.regions, normaliseName(r.Name))
+			} else if unparent {
+				r.Parent = ""
+			} else {
+				return false, fmt.Errorf("region %q has child regions; use -u to unparent or -f to delete them", name)
+			}
+		}
 	}
 	delete(s.regions, key)
 	return true, s.save()

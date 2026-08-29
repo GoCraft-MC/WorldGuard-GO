@@ -28,11 +28,14 @@ func (a AABB) String() string {
 
 // Region is a named, protected area of the world.
 type Region struct {
-	Name    string          `json:"name"`
-	Bounds  AABB            `json:"bounds"`
-	Flags   map[Flag]string `json:"flags"`
-	Members []string        `json:"members"` // usernames (lowercase)
-	Owners  []string        `json:"owners"`  // usernames (lowercase)
+	Name     string          `json:"name"`
+	Bounds   AABB            `json:"bounds"`
+	Flags    map[Flag]string `json:"flags"`
+	Members  []string        `json:"members"`  // usernames/groups (lowercase)
+	Owners   []string        `json:"owners"`   // usernames/groups (lowercase)
+	Priority int             `json:"priority"` // higher wins; default 0
+	Parent   string          `json:"parent,omitempty"`
+	Global   bool            `json:"global,omitempty"` // no physical bounds
 }
 
 // New returns a Region with default flags.
@@ -42,6 +45,42 @@ func New(name string, bounds AABB) *Region {
 		Bounds: bounds,
 		Flags:  map[Flag]string{},
 	}
+}
+
+// NewGlobal returns a Region with no physical bounds.
+func NewGlobal(name string) *Region {
+	return &Region{
+		Name:   name,
+		Global: true,
+		Flags:  map[Flag]string{},
+	}
+}
+
+// AddOwner adds username as an owner if not already present.
+func (r *Region) AddOwner(username string) {
+	username = normaliseName(username)
+	for _, o := range r.Owners {
+		if o == username {
+			return
+		}
+	}
+	r.Owners = append(r.Owners, username)
+}
+
+// RemoveOwner removes username from the owner list.
+func (r *Region) RemoveOwner(username string) {
+	r.Owners = removeString(r.Owners, normaliseName(username))
+}
+
+// IsOwner reports whether username is an owner of the region.
+func (r *Region) IsOwner(username string) bool {
+	username = normaliseName(username)
+	for _, o := range r.Owners {
+		if o == username {
+			return true
+		}
+	}
+	return false
 }
 
 // HasMember reports whether the username is a member or owner of the region.
