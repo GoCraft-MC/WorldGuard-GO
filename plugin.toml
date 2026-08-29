@@ -19,12 +19,27 @@ perms = [
   "worldguard.region.removemember",
   "worldguard.region.info",
   "worldguard.region.list",
+  "worldguard.region.bypass",
   "worldguard.bypass",
+  "worldguard.god",
+  "worldguard.heal",
+  "worldguard.slay",
+  "worldguard.locate",
+  "worldguard.stack",
+  "worldguard.stopfire",
+  "worldguard.allowfire",
+  "worldguard.stoplag",
+  "worldguard.god.other",
+  "worldguard.heal.other",
+  "worldguard.slay.other",
+  "worldguard.locate.other",
 ]
 
+# ── /region (/rg) ─────────────────────────────────────────────────────────────
 [[commands]]
 name        = "region"
 description = "Manage WorldGuard regions"
+aliases     = ["rg"]
 permission  = "worldguard.region.info"
 
 [[commands.children]]
@@ -66,3 +81,126 @@ permission  = "worldguard.region.info"
 name        = "list"
 description = "List all regions"
 permission  = "worldguard.region.list"
+
+[[commands.children]]
+name        = "bypass"
+description = "Toggle region protection bypass"
+aliases     = ["toggle-bypass"]
+permission  = "worldguard.region.bypass"
+
+# ── Gameplay ──────────────────────────────────────────────────────────────────
+[[commands]]
+name        = "god"
+description = "Give yourself or another player invincibility"
+permission  = "worldguard.god"
+
+[[commands]]
+name        = "ungod"
+description = "Remove invincibility from yourself or another player"
+permission  = "worldguard.god"
+
+[[commands]]
+name        = "heal"
+description = "Heal yourself or another player"
+permission  = "worldguard.heal"
+
+[[commands]]
+name        = "slay"
+description = "Slay yourself or another player"
+permission  = "worldguard.slay"
+
+[[commands]]
+name        = "locate"
+description = "Point your compass to a player or spawn"
+permission  = "worldguard.locate"
+
+[[commands]]
+name        = "stack"
+description = "Organise your inventory and stack items"
+aliases     = [";"]
+permission  = "worldguard.stack"
+
+# ── Emergency ─────────────────────────────────────────────────────────────────
+[[commands]]
+name        = "stopfire"
+description = "Stop all fire spread on the current or given world"
+permission  = "worldguard.stopfire"
+
+[[commands]]
+name        = "allowfire"
+description = "Lift the fire spread suspension"
+permission  = "worldguard.allowfire"
+
+[[commands]]
+name        = "stoplag"
+description = "Remove all entities and suspend physics to reduce lag"
+aliases     = ["halt-activity", "haltactivity"]
+permission  = "worldguard.stoplag"
+
+# ── /wg ───────────────────────────────────────────────────────────────────────
+[[commands]]
+name        = "wg"
+description = "WorldGuard management commands"
+permission  = "worldguard.version"
+
+[[commands.children]]
+name        = "version"
+description = "Show WorldGuard-GO version"
+permission  = "worldguard.version"
+
+[[commands.children]]
+name        = "reload"
+description = "Reload configuration, blacklist, and region data"
+permission  = "worldguard.reload"
+
+[[commands.children]]
+name        = "report"
+description = "Write a server report file"
+permission  = "worldguard.report"
+
+[[commands.children]]
+name        = "profile"
+description = "Profile CPU usage of the server"
+permission  = "worldguard.profile"
+
+[[commands.children]]
+name        = "stopprofile"
+description = "Stop the currently running profiler"
+permission  = "worldguard.profile"
+
+[[commands.children]]
+name        = "running"
+description = "Show WorldGuard running tasks"
+aliases     = ["queue"]
+permission  = "worldguard.running"
+
+[[commands.children]]
+name        = "flushstates"
+description = "Clear stored player flag states"
+aliases     = ["clearstates"]
+permission  = "worldguard.flushstates"
+
+[[commands.children]]
+name        = "debug"
+description = "Simulate block/entity events for troubleshooting"
+permission  = "worldguard.debug"
+
+[[commands.children.children]]
+name        = "testbreak"
+description = "Simulate a block break event"
+permission  = "worldguard.debug"
+
+[[commands.children.children]]
+name        = "testplace"
+description = "Simulate a block place event"
+permission  = "worldguard.debug"
+
+[[commands.children.children]]
+name        = "testinteract"
+description = "Simulate a block interact event"
+permission  = "worldguard.debug"
+
+[[commands.children.children]]
+name        = "testdamage"
+description = "Simulate an entity damage event"
+permission  = "worldguard.debug"
