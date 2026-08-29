@@ -1,0 +1,68 @@
+id      = "worldguard"
+version = "0.1.0"
+api     = "1"
+runtime = "go"
+entry   = "worldguard"
+
+[subscribe]
+events = [
+  "block.break",
+  "block.place",
+  "player.join",
+]
+perms = [
+  "worldguard.region.define",
+  "worldguard.region.redefine",
+  "worldguard.region.remove",
+  "worldguard.region.flag",
+  "worldguard.region.addmember",
+  "worldguard.region.removemember",
+  "worldguard.region.info",
+  "worldguard.region.list",
+  "worldguard.bypass",
+]
+
+[[commands]]
+name        = "region"
+description = "Manage WorldGuard regions"
+permission  = "worldguard.region.info"
+
+[[commands.children]]
+name        = "define"
+description = "Define a new region from your current selection"
+permission  = "worldguard.region.define"
+
+[[commands.children]]
+name        = "redefine"
+description = "Redefine an existing region from your current selection"
+permission  = "worldguard.region.redefine"
+
+[[commands.children]]
+name        = "remove"
+description = "Remove a region"
+permission  = "worldguard.region.remove"
+
+[[commands.children]]
+name        = "flag"
+description = "Set a flag on a region"
+permission  = "worldguard.region.flag"
+
+[[commands.children]]
+name        = "addmember"
+description = "Add a member to a region"
+permission  = "worldguard.region.addmember"
+
+[[commands.children]]
+name        = "removemember"
+description = "Remove a member from a region"
+permission  = "worldguard.region.removemember"
+
+[[commands.children]]
+name        = "info"
+description = "Show information about a region"
+permission  = "worldguard.region.info"
+
+[[commands.children]]
+name        = "list"
+description = "List all regions"
+permission  = "worldguard.region.list"
